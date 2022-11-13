@@ -16,14 +16,6 @@ public class RandomCaret extends DefaultCaret {
         super();
         
     }
-
-    @Override
-    public int getMark() {
-        return getDot();// Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-    }
-
-    
-    
     
     
 }

@@ -87,6 +87,7 @@ public class EditorFrame extends javax.swing.JFrame {
 
         textArea.setEditable(false);
         textArea.setColumns(20);
+        textArea.setFont(new java.awt.Font("Courier 10 Pitch", 0, 18)); // NOI18N
         textArea.setRows(5);
         jScrollPane1.setViewportView(textArea);
 

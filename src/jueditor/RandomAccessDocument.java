@@ -34,9 +34,13 @@ public class RandomAccessDocument implements Document {
 
     private RandomAccessElementCollection elementCollection = new RandomAccessElementCollection(this);
     private RandomAccessFile raf;
-    private File file = new File("test/test.csv");
+    private File file = new File("test/test.txt");
 
     private boolean paused;
+    
+    public String getDocumentName() {
+        return file.getAbsolutePath();
+    }
 
     public RandomAccessDocument() {
         load();
@@ -75,7 +79,7 @@ public class RandomAccessDocument implements Document {
                     }
                     final byte[] bb = new byte[size];
                     System.arraycopy(buff, i - size, bb, 0, bb.length);
-                    bl.append(new String(bb, "UTF-8"));
+                    bl.append(new String(bb, charsetName));
 
                     bep = cp;
                     elementCollection.createBreak(cp, new String(bl));
@@ -98,7 +102,7 @@ public class RandomAccessDocument implements Document {
                     }
                     final byte[] bb = new byte[size];
                     System.arraycopy(buff, i - size, bb, 0, bb.length);
-                    bl.append(new String(bb, "UTF-8"));
+                    bl.append(new String(bb, charsetName));
                     i = 0;
                     dr = str.read(buff);
                 }
@@ -118,59 +122,9 @@ public class RandomAccessDocument implements Document {
             Logger.getLogger(RandomAccessDocument.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    private final String charsetName = "UTF-8";
 
-    /*  private void continueLoad() {
-        BufferedInputStream str = null;
-        try {
-            int bsp = 0;
-            int bep = -1;
-            Element e = elementCollection.get(elementCollection.size() - 1);
-            int endOffset = e.getEndOffset();
-            str = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
-            str.skip(endOffset);
-            final byte[] buff = new byte[1024];
-            int dr = str.read(buff);
-            int b = buff[0];
-            int cp = 0;
-            int i = 1;
-            int inserted = 0;
-            while (dr > 0) {
-                if (b == '\n') {
-                    bep = cp;
-                    elementCollection.createBreak(bsp, bep);
-                    bsp = cp;
-                    if (inserted > 999) {
-                        paused = true;
-                        break;
-                    }
-
-                    inserted++;
-                }
-                b = buff[i];
-                i++;
-                cp++;
-                if (i == dr) {
-                    i = 0;
-                    dr = str.read(buff);
-                }
-            }
-            str.close();
-            if (dr < buff.length) {
-                paused = false;
-                elementCollection.createBreak(bsp, (int) file.length());
-            }
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(RandomAccessDocument.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(RandomAccessDocument.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                str.close();
-            } catch (IOException ex) {
-                Logger.getLogger(RandomAccessDocument.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }*/
+    
     @Override
     public int getLength() {
         return (int) file.length();
@@ -252,7 +206,8 @@ public class RandomAccessDocument implements Document {
                 }
 
                 if (br > 0) {
-                    String s = new String(b, Charset.forName("utf-8"));                    String substring = s.substring(0, byteOffset.charDistance);
+                    String s = new String(b, Charset.forName("utf-8"));
+                    String substring = s.substring(0, byteOffset.charDistance);
                     raf.seek(byteOffset.blockStartBytePos + substring.getBytes("utf-8").length);
                 } else {
                     return null;
@@ -281,13 +236,15 @@ public class RandomAccessDocument implements Document {
 
     @Override
     public void getText(int offset, int length, Segment txt) throws BadLocationException {
-        String s = getText(offset, length);
-        char[] ca = s.toCharArray();
-
-        txt.array = ca;
-        txt.count = ca.length;
-        //   txt.copy
-        txt.offset = 0;
+        if (length > 0) {
+            String s = getText(offset, length);
+            char[] ca = s.toCharArray();
+            
+            txt.array = ca;
+            txt.count = ca.length;
+            //   txt.copy
+            txt.offset = 0;
+        }
     }
 
     @Override
